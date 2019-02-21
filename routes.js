@@ -62,10 +62,15 @@ router.get('/users', authenticateUser, (req,res) => {
 // route to create user
 router.post('/users', (req,res,next) => {
     const user = new User(req.body);
+
+    // Hash the new user's password.
+    user.password = bcryptjs.hashSync(user.password);
+
     user.save((err, user) => {
         if(err) return next(err);
         res.status(201);
         res.location('/');
+        res.end();
     });
 });
 
