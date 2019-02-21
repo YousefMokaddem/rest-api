@@ -21,8 +21,7 @@ const authenticateUser = async (req,res,next) => {
         let user = (await User.find({emailAddress: credentials.name}))[0];
         //if the user was retrieved...
         if(user){
-            console.log(user);
-            console.log(credentials);
+            //check the password
             const authenticated = bcryptjs
                 .compareSync(credentials.pass, user.password);
             //if the passwords match...
@@ -52,12 +51,23 @@ const authenticateUser = async (req,res,next) => {
 
 // route to return currently authenticated user
 router.get('/users', authenticateUser, (req,res) => {
-    let user = req.currentUser;
+    const user = req.currentUser;
     res.json({
         firstName: user.firstName,
         lastName: user.lastName,
         emailAddress: user.emailAddress
     });
 });
+
+// route to create user
+router.post('/users', (req,res,next) => {
+    const user = new User(req.body);
+    user.save((err, user) => {
+        if(err) return next(err);
+        res.status(201);
+        res.location('/');
+    });
+});
+
 
 module.exports = router;
