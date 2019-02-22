@@ -84,4 +84,14 @@ router.get('/courses', (req,res,next) => {
         });
 });
 
+// route to return course by id
+router.get('/courses/:id', (req,res,next) => {
+    Course.findById(req.params.id)
+        .populate('user', 'firstName lastName')
+        .exec((err, course) => {
+            if (err) return next(err);
+            res.json(course);
+        });
+});
+
 module.exports = router;
