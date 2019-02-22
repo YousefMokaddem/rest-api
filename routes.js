@@ -74,5 +74,14 @@ router.post('/users', (req,res,next) => {
     });
 });
 
+// route to get list of courses
+router.get('/courses', (req,res,next) => {
+    Course.find({})
+        .populate('user', 'firstName lastName')
+        .exec((err, courses) => {
+            if (err) return next(err);
+            res.json(courses);
+        });
+});
 
 module.exports = router;
