@@ -127,13 +127,20 @@ router.post('/courses', authenticateUser, (req,res,next) => {
 router.put('/courses/:id', authenticateUser, (req,res,next) => {
     Course.findById(req.params.id)
         .exec((err, course) => {
-            if(err) return next(err);
-            Object.assign(course, req.body);
-            course.save((err) => {
+            //need == here because we have different types.
+            if(req.currentUser.id == course.user){
                 if(err) return next(err);
-                res.status(204);
-                res.end()
-            });
+                Object.assign(course, req.body);
+                course.save((err) => {
+                    if(err) return next(err);
+                    res.status(204);
+                    res.end()
+                });
+            }else{
+                err = new Error("Access Denied");
+                err.status = 401;
+                return next(err);
+            }
         });
 });
 
@@ -141,12 +148,18 @@ router.put('/courses/:id', authenticateUser, (req,res,next) => {
 router.delete('/courses/:id', authenticateUser, (req,res,next) => {
     Course.findById(req.params.id)
         .exec((err,course) => {
-            if (err) return next(err);
-            course.remove(err => {
-                if(err) return next(err);
-                res.status(204);
-                res.end();
-            });
+            if(req.currentUser.id == course.user){
+                if (err) return next(err);
+                course.remove(err => {
+                    if(err) return next(err);
+                    res.status(204);
+                    res.end();
+                });
+            }else{
+                err = new Error("Access Denied");
+                err.status = 401;
+                return next(err);
+            }
         });
 });
 
