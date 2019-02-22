@@ -65,13 +65,30 @@ router.post('/users', (req,res,next) => {
 
     // Hash the new user's password.
     user.password = bcryptjs.hashSync(user.password);
-
-    user.save((err, user) => {
-        if(err) return next(err);
-        res.status(201);
-        res.location('/');
-        res.end();
-    });
+    //validate email
+    if(!/^[^@]+@[^@.]+\.[a-z]+$/i.test(user.emailAddress)){
+        let err = new Error("Bad Request - invalid email");
+        err.status = 400;
+        return next(err)
+    }
+    //check email against database to ensure it is unique
+    User.find({emailAddress: user.emailAddress})
+        .exec((err, userfound) => {
+            if(err) return next(err);
+            if (userfound[0] !== undefined){
+                //email is already in use
+                err = new Error("Conflict - email in use");
+                err.status = 409;
+                return next(err);
+            }else{
+                user.save((err, user) => {
+                    if(err) return next(err);
+                    res.status(201);
+                    res.location('/');
+                    res.end();
+                });
+            }
+        });
 });
 
 // route to get list of courses
@@ -95,7 +112,7 @@ router.get('/courses/:id', (req,res,next) => {
 });
 
 // route to create a course
-router.post('/courses', (req,res,next) => {
+router.post('/courses', authenticateUser, (req,res,next) => {
     const course = new Course(req.body);
 
     course.save((err, course) => {
@@ -107,7 +124,7 @@ router.post('/courses', (req,res,next) => {
 });
 
 // route to update a course
-router.put('/courses/:id', (req,res,next) => {
+router.put('/courses/:id', authenticateUser, (req,res,next) => {
     Course.findById(req.params.id)
         .exec((err, course) => {
             if(err) return next(err);
@@ -121,7 +138,7 @@ router.put('/courses/:id', (req,res,next) => {
 });
 
 // route to delete a course
-router.delete('/courses/:id', (req,res,next) => {
+router.delete('/courses/:id', authenticateUser, (req,res,next) => {
     Course.findById(req.params.id)
         .exec((err,course) => {
             if (err) return next(err);
