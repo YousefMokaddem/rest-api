@@ -105,4 +105,17 @@ router.post('/courses', (req,res,next) => {
         res.end();
     });
 });
+
+// route to update a course
+router.put('/courses/:id', (req,res,next) => {
+    Course.findById(req.params.id)
+        .exec((err, course) => {
+            if(err) return next(err);
+            Object.assign(course, req.body);
+            course.save(() => {
+                res.status(204);
+                res.end()
+            });
+        });
+});
 module.exports = router;
