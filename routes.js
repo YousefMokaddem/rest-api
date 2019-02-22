@@ -112,7 +112,8 @@ router.put('/courses/:id', (req,res,next) => {
         .exec((err, course) => {
             if(err) return next(err);
             Object.assign(course, req.body);
-            course.save(() => {
+            course.save((err) => {
+                if(err) return next(err);
                 res.status(204);
                 res.end()
             });
