@@ -94,4 +94,15 @@ router.get('/courses/:id', (req,res,next) => {
         });
 });
 
+// route to create a course
+router.post('/courses', (req,res,next) => {
+    const course = new Course(req.body);
+
+    course.save((err, course) => {
+        if(err) return next(err);
+        res.status(201);
+        res.location(`/api/courses/${course.id}`)
+        res.end();
+    });
+});
 module.exports = router;
