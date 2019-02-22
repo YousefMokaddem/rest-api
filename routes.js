@@ -118,4 +118,18 @@ router.put('/courses/:id', (req,res,next) => {
             });
         });
 });
+
+// route to delete a course
+router.delete('/courses/:id', (req,res,next) => {
+    Course.findById(req.params.id)
+        .exec((err,course) => {
+            if (err) return next(err);
+            course.remove(err => {
+                if(err) return next(err);
+                res.status(204);
+                res.end();
+            });
+        });
+});
+
 module.exports = router;
